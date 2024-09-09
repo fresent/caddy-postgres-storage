@@ -1,4 +1,4 @@
-module github.com/yroc92/postgres-storage
+module github.com/fresent/caddy-postgres-storage
 
 go 1.18
 
@@ -41,7 +41,7 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	go.uber.org/zap v1.23.0 // indirect
+	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.0.0-20220812165438-1d4ff48094d1 // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
