@@ -33,7 +33,7 @@ Now with support for Caddyfile and environment configuration.
   "storage": {
     "module": "postgres",
     "dbname": "certmagictest",
-    "host": "localhost",
+    "hosts": "localhost",
     "password": "postgres",
     "port": "5432",
     "sslmode": "disable",
@@ -62,7 +62,7 @@ or
 {
   storage postgres {
     dbname certmagictest
-    host localhost
+    hosts localhost,localhost2
     password postgres
     port 5432
     sslmode disable

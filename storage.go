@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"strconv"
+    "strings"
 	"time"
 
 	"github.com/caddyserver/caddy/v2"
@@ -26,7 +27,7 @@ type PostgresStorage struct {
 	QueryTimeout     time.Duration `json:"query_timeout,omitempty"`
 	LockTimeout      time.Duration `json:"lock_timeout,omitempty"`
 	Database         *sql.DB       `json:"-"`
-	Host             string        `json:"host,omitempty"`
+	Hosts            string        `json:"hosts,omitempty"`
 	Port             string        `json:"port,omitempty"`
 	User             string        `json:"user,omitempty"`
 	Password         string        `json:"password,omitempty"`
@@ -51,8 +52,8 @@ func (c *PostgresStorage) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 		}
 
 		switch key {
-		case "host":
-			c.Host = value
+		case "hosts":
+			c.Hosts = value
 		case "port":
 			c.Port = value
 		case "user":
@@ -81,8 +82,8 @@ func (c *PostgresStorage) Provision(ctx caddy.Context) error {
 	c.logger = ctx.Logger(c)
 
 	// Load Environment
-	if c.Host == "" {
-		c.Host = os.Getenv("POSTGRES_HOST")
+	if c.Hosts == "" {
+		c.Hosts = os.Getenv("POSTGRES_HOSTS")
 	}
 	if c.Port == "" {
 		c.Port = os.Getenv("POSTGRES_PORT")
@@ -136,15 +137,23 @@ func NewStorage(c PostgresStorage) (certmagic.Storage, error) {
 	if len(c.ConnectionString) > 0 {
 		connStr = c.ConnectionString
 	} else {
-		connStr_fmt := "host=%s port=%s user=%s password=%s dbname=%s sslmode=%s"
-		// Set each value dynamically w/ Sprintf
-		connStr = fmt.Sprintf(connStr_fmt, c.Host, c.Port, c.User, c.Password, c.DBname, c.SSLmode)
+	    hosts := strings.Split(c.Hosts, ",")
+	    for _, host := range hosts {
+            singleConnStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+                host, c.Port, c.User, c.Password, c.DBname, c.SSLmode)
+            database, err := sql.Open("postgres", singleConnStr)
+            if err == nil {
+                c.Database = database
+                break
+            }
+            // If connection fails, suppress the error and try the next host
+            c.logger.Warn("failed to connect to Postgres host", zap.String("host", host), zap.Error(err))
+        }
+        if c.Database == nil {
+            return nil, fmt.Errorf("failed to connect to any Postgres host")
+        }
 	}
 
-	database, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
-	}
 	s := &PostgresStorage{
 		Database:     database,
 		QueryTimeout: c.QueryTimeout,
