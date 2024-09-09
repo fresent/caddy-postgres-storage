@@ -156,7 +156,7 @@ func NewStorage(c PostgresStorage) (certmagic.Storage, error) {
             c.logger.Warn("failed to connect to Postgres host", zap.String("host", host), zap.Error(err))
         }
         if c.Database == nil {
-            return nil, fmt.Errorf("failed to connect to any Postgres host")
+            return nil, fmt.Errorf("failed to connect to any Postgres host.")
         }
 	}
 
