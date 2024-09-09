@@ -136,6 +136,12 @@ func NewStorage(c PostgresStorage) (certmagic.Storage, error) {
 	var connStr string
 	if len(c.ConnectionString) > 0 {
 		connStr = c.ConnectionString
+		database, err := sql.Open("postgres", connStr)
+        if err == nil {
+            c.Database = database
+        } else {
+            return nil, fmt.Errorf("failed to connect to Postgres host")
+        }
 	} else {
 	    hosts := strings.Split(c.Hosts, ",")
 	    for _, host := range hosts {
