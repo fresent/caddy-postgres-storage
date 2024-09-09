@@ -140,7 +140,7 @@ func NewStorage(c PostgresStorage) (certmagic.Storage, error) {
         if err == nil {
             c.Database = database
         } else {
-            return nil, fmt.Errorf("failed to connect to Postgres host")
+            return nil, fmt.Errorf("failed to connect to Postgres host using connection string")
         }
 	} else {
 	    hosts := strings.Split(c.Hosts, ",")
