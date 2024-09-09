@@ -161,7 +161,7 @@ func NewStorage(c PostgresStorage) (certmagic.Storage, error) {
 	}
 
 	s := &PostgresStorage{
-		Database:     database,
+		Database:     c.Database,
 		QueryTimeout: c.QueryTimeout,
 		LockTimeout:  c.LockTimeout,
 		DisableDDL:   c.DisableDDL,
